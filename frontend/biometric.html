@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Biometric Verification</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#eef7f3;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:#fff;padding:24px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.06);width:420px;text-align:center}
+    button{padding:12px 18px;margin-top:12px;border-radius:8px;border:none;cursor:pointer}
+    .scan{background:#28a745;color:#fff}
+    .skip{background:#6c757d;color:#fff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Biometric Verification (Simulated)</h2>
+    <p>Click the button to simulate fingerprint/face scan. On a real system this will use WebAuthn.</p>
+    <button id="scanBtn" class="scan">Scan Fingerprint</button>
+    <div style="margin-top:12px">
+      <button id="skipBtn" class="skip">Skip (for demo)</button>
+    </div>
+  </div>
+
+  <script>
+    const jwt = sessionStorage.getItem('jwt');
+    const passed = sessionStorage.getItem('passedStage');
+    if(!jwt || passed !== 'biometric'){ alert('Please complete previous steps'); window.location.href='login.html'; }
+
+    document.getElementById('scanBtn').addEventListener('click', function(){
+      this.disabled = true;
+      this.textContent = 'Scanning...';
+      setTimeout(()=>{
+        // In a real flow you'd call the backend WebAuthn endpoints here.
+        sessionStorage.setItem('authenticated','true');
+        window.location.href = 'dashboard.html';
+      }, 1400);
+    });
+
+    document.getElementById('skipBtn').addEventListener('click', function(){
+      sessionStorage.setItem('authenticated','true');
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

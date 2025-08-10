@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sign Up - Secure Auth</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#f4f6f8;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:#fff;padding:24px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08);width:380px}
+    input,select{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px}
+    button{width:100%;padding:10px;background:#28a745;color:#fff;border:none;border-radius:6px;cursor:pointer}
+    .muted{font-size:13px;color:#666;margin-top:10px;text-align:center}
+    a{color:#007bff;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="text-align:center">Create Account</h2>
+    <form id="signupForm">
+      <input id="name" placeholder="Full name" required />
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <input id="confirmPassword" type="password" placeholder="Confirm password" required />
+      <label for="question">Security question</label>
+      <select id="question" required>
+        <option value="">-- choose --</option>
+        <option value="mother_maiden">What is your mother's maiden name?</option>
+        <option value="first_pet">Name of your first pet?</option>
+        <option value="first_school">Name of your first school?</option>
+      </select>
+      <input id="answer" placeholder="Answer (case-insensitive)" required />
+      <div style="margin-top:10px">
+        <button type="submit">Sign Up</button>
+      </div>
+    </form>
+    <div class="muted">Already have an account? <a href="./login.html">Login</a></div>
+  </div>
+
+  <script>
+    async function postJSON(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return res;
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirmPassword').value;
+      const question = document.getElementById('question').value;
+      const answer = document.getElementById('answer').value.trim();
+
+      if(password !== confirm){ alert('Passwords do not match'); return; }
+      if(!question){ alert('Select a security question'); return; }
+
+      try {
+        const res = await postJSON(API_URL + '/api/auth/register', { name, email, password, securityQuestion: question, securityAnswer: answer });
+        const json = await res.json();
+        if(!res.ok) throw new Error(json.error || 'Register failed');
+        // show QR for scanning
+        localStorage.setItem('pending_registration_email', email);
+        const w = window.open('', '_blank');
+        w.document.write('<h3>Scan this QR with Google Authenticator (close when done)</h3><img src="' + json.qrDataUrl + '" />');
+        alert('Registration successful. After scanning QR with Authenticator, go to login.');
+        window.location.href = 'login.html';
+      } catch (err) {
+        alert('Register error: ' + err.message);
+      }
+    });
+  </script>
+  <script src="./script.js"></script>
+  <a href="./login.html"></a>
+</body>
+</html>

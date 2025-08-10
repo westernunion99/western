@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Google Authenticator (TOTP)</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#f0f4f8;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:#fff;padding:22px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.06);width:360px;text-align:center}
+    input{width:100%;padding:12px;margin-top:12px;border:1px solid #ccc;border-radius:6px;font-size:20px;text-align:center;letter-spacing:6px}
+    button{width:100%;padding:10px;margin-top:12px;background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer}
+    .help{font-size:13px;color:#666;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Enter TOTP Code</h2>
+    <p class="help">Open your Authenticator app and enter the 6-digit code.</p>
+    <form id="totpForm">
+      <input id="totp" maxlength="6" placeholder="------" required />
+      <button type="submit">Verify</button>
+    </form>
+  </div>
+
+  <script>
+    async function postJSON(url, body, token) {
+      const headers = { 'Content-Type': 'application/json' };
+      if(token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+      return res;
+    }
+
+    const passed = sessionStorage.getItem('passedStage');
+    if(passed !== 'totp'){ alert('Please complete previous steps'); window.location.href='login.html'; }
+
+    document.getElementById('totpForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const code = document.getElementById('totp').value.trim();
+      const token = sessionStorage.getItem('tempToken');
+      try {
+        const res = await postJSON(API_URL + '/api/auth/verify-totp', { token: code }, token);
+        const json = await res.json();
+        if(!res.ok) throw new Error(json.error || 'TOTP verification failed');
+        sessionStorage.setItem('jwt', json.token);
+        sessionStorage.setItem('passedStage','biometric');
+        window.location.href = 'biometric.html';
+      } catch (err) {
+        alert('TOTP error: ' + err.message);
+      }
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Login</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#f2f5f9;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:#fff;padding:22px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.06);width:360px}
+    input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px}
+    button{width:100%;padding:10px;background:#343a40;color:#fff;border:none;border-radius:6px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="text-align:center">Admin Login</h2>
+    <form id="adminForm">
+      <input id="adminEmail" placeholder="mailjosephoheji.com" required />
+      <input id="adminPass" type="password" placeholder="password" required />
+      <button type="submit">Sign in as Admin</button>
+    </form>
+    <p style="font-size:13px;color:#666;text-align:center;margin-top:10px">Default admin: <strong>western</strong> / <strong>AdminPass123</strong></p>
+  </div>
+
+  <script>
+    document.getElementById('adminForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('adminPass').value;
+
+      const res = await fetch(API_URL + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      const j = await res.json();
+      if(!res.ok){ alert('Admin login failed: '+(j.error||'unknown')); return; }
+      const res2 = await fetch(API_URL + '/api/auth/verify-challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + j.tempToken },
+        body: JSON.stringify({ answer: pass })
+      });
+      const j2 = await res2.json();
+      if(!res2.ok){ alert('Admin challenge failed: '+(j2.error||'unknown')); return; }
+      sessionStorage.setItem('tempToken', j2.tempToken);
+      sessionStorage.setItem('currentUser', email);
+      alert('Admin temp token acquired. Please complete TOTP step using google-auth.html to finish login.');
+      window.location.href = 'google-auth.html';
+    } );
+  </script>
+  <script src="./script.js"></script>
+</body>
+</html>

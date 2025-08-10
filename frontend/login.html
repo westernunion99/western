@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Login - Secure Auth</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#eef2f7;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:#fff;padding:24px;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.08);width:360px}
+    input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:6px} button{width: 100%;padding:10px;background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer}
+    .small{font-size:13px;color:#666;text-align:center;margin-top:12px}
+    a{color:#007bff;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="text-align:center">Secure Banking Login</h2>
+    <form id="loginForm">
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <button type="submit">Continue to 2FA</button>
+    </form>
+    <div class="small">Don't have an account? <a href="./signup.html">Sign up</a></div>
+    <div class="small" style="margin-top:6px"><a href="./admin-login.html">Admin login</a></div>
+  </div>
+
+  <script>
+    async function postJSON(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+  
+    });
+      return res;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const pw = document.getElementById('password').value;
+      try {
+        const res = await postJSON(API_URL + '/api/auth/login', { email, password: pw });
+        const json = await res.json();
+        if(!res.ok) throw new Error(json.error || 'Login failed');
+        sessionStorage.setItem('tempToken', json.tempToken);
+        sessionStorage.setItem('currentUser', email);
+        sessionStorage.setItem('passedStage','challenge');
+        window.location.href = 'challenge-question.html';
+      } catch (err) {
+        alert('Login error: ' + err.message);
+      }
+    });
+  </script>
+  <script src="./script.js"></script>
+  <a href="./"></a>
+</body>
+</html>
+

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Dashboard</title>
+  <script>const API_URL = "http://127.0.0.1:4000";</script>
+  <style>
+    body{font-family:Arial;background:#fff;padding:18px}
+    header{display:flex;justify-content:space-between;align-items:center}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    button{padding:6px 10px;border-radius:6px;border:none;cursor:pointer}
+    .danger{background:#dc3545;color:#fff}
+    .muted{color:#666;font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <div>
+      <button id="logoutAdmin">Logout</button>
+    </div>
+  </header>
+
+  <p class="muted">Manage user accounts (server-side data)</p>
+  <table id="usersTable">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Active</th><th>Biometric</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const jwt = sessionStorage.getItem('jwt');
+    if(!jwt){ alert('Not authenticated as admin'); window.location.href='admin-login.html'; }
+
+    async function api(path, method='GET', body) {
+      const headers = { 'Authorization': 'Bearer ' + jwt };
+      if(body) headers['Content-Type'] = 'application/json';
+      const res = await fetch(API_URL + path, { method, headers, body: body? JSON.stringify(body): undefined });
+      return res;
+    }
+
+    async function render(){
+      const res = await api('/api/admin/users');
+      const j = await res.json();
+      if(!res.ok){ alert('Admin API error: '+(j.error||'')); window.location.href='admin-login.html'; return; }
+      const tbody = document.querySelector('#usersTable tbody');
+      tbody.innerHTML = '';
+      j.users.forEach((u, idx)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${u.name}</td><td>${u.email}</td><td>${u.active? 'Yes':'No'}</td><td>${u.biometricEnrolled? 'Yes':'No'}</td>
+          <td>
+            <button onclick="toggleActive('${u._id}')">${u.active? 'Deactivate':'Activate'}</button>
+            <button onclick="deleteUser('${u._id}')" class="danger">Delete</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function toggleActive(id){
+      const res = await api('/api/admin/users/'+id, 'PATCH', { active: false });
+      await render();
+    }
+    async function deleteUser(id){
+      if(!confirm('Delete this user?')) return;
+      const res = await api('/api/admin/users/'+id, 'DELETE');
+      await render();
+    }
+
+    document.getElementById('logoutAdmin').addEventListener('click', function(){
+      sessionStorage.removeItem('jwt');
+      window.location.href='admin-login.html';
+    });
+
+    render();
+  </script>
+  <script src="./admin-login.html"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Challenge Question</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#f7fbfe;display:flex;align-items:center;justify-content:center;height:100vh}
+    .card{background:#fff;padding:22px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.06);width:420px}
+    input{width:100%;padding:10px;margin-top:10px;border:1px solid #ccc;border-radius:6px}
+    button{width:100%;padding:10px;margin-top:12px;background:#ffc107;border:none;border-radius:6px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="text-align:center">Security Check</h2>
+    <p id="questionText" style="font-weight:600"></p>
+    <form id="challengeForm">
+      <input id="answer" placeholder="Your answer" required />
+      <button type="submit">Verify & Continue</button>
+    </form>
+  </div>
+
+  <script>
+    const email = sessionStorage.getItem('currentUser');
+    const passed = sessionStorage.getItem('passedStage');
+    if(!email || passed !== 'challenge'){ alert('Please login first'); window.location.href='login.html'; }
+
+    async function postJSON(url, body, token) {
+      const headers = { 'Content-Type': 'application/json' };
+      if(token) headers['Authorization'] = 'Bearer ' + token;
+      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+      return res;
+    }
+
+    async function loadUserQuestion() {
+      document.getElementById('questionText').textContent = 'Please answer your security question';
+    }
+
+    loadUserQuestion();
+
+    document.getElementById('challengeForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const ans = document.getElementById('answer').value.trim();
+      const token = sessionStorage.getItem('tempToken');
+      try {
+        const res = await postJSON(API_URL + '/api/auth/verify-challenge', { answer: ans }, token);
+        const json = await res.json();
+        if(!res.ok) throw new Error(json.error || 'Challenge verification failed');
+        sessionStorage.setItem('tempToken', json.tempToken);
+        sessionStorage.setItem('passedStage','totp');
+        window.location.href = 'google-auth.html';
+      } catch (err) {
+        alert('Challenge error: ' + err.message);
+      }
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

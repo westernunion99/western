@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>User Dashboard</title>
+  <script>const API_URL = "http://127.0.0.1:5500";</script>
+  <style>
+    body{font-family:Arial;background:#fff;min-height:100vh;padding:24px}
+    header{display:flex;justify-content:space-between;align-items:center}
+    .card{padding:18px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.05);margin-top:18px}
+    button{padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+    .logout{background:#dc3545;color:#fff}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard</h1>
+    <div>
+      <button onclick="location.href='admin-login.html'">Admin</button>
+      <button class="logout" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <div class="card" id="profileCard"></div>
+  <div class="card" id="infoCard" style="margin-top:12px"></div>
+
+  <script>
+    const jwt = sessionStorage.getItem('jwt');
+    const auth = sessionStorage.getItem('authenticated') === 'true';
+    if(!jwt || !auth){ alert('Not authenticated'); window.location.href='login.html'; }
+
+    async function loadProfile(){
+      const res = await fetch(API_URL + '/api/auth/me', {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      });
+      const j = await res.json();
+      if(!res.ok){ alert('Session invalid'); window.location.href='login.html'; return; }
+      const user = j.user;
+      document.getElementById('profileCard').innerHTML = '<h3>Welcome, '+user.name+'</h3><p><strong>Email:</strong> '+user.email+'</p><p><strong>Account created:</strong> '+new Date(user.createdAt).toLocaleString()+'</p>';
+      document.getElementById('infoCard').innerHTML = '<p><strong>Role:</strong> '+user.role+'</p><p class="muted">This is demo UI. TOTP secret and biometric indicators are server-side in production.</p>';
+    }
+    loadProfile();
+
+    document.getElementById('logoutBtn').addEventListener('click', function(){
+      sessionStorage.clear();
+      window.location.href='login.html';
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
