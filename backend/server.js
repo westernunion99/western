@@ -3,15 +3,16 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // ✅ CORS enabled
+app.use(express.json()); // ✅ JSON body parsing
 
-// Serve frontend files
-app.use(express.static(path.join(__dirname, '. ./frontend')));
+// Serve frontend files (fixed the space in path)
+app.use(express.static(path.join(__dirname, './frontend')));
 
 // Example API route for login
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
+
   if (username === 'test' && password === '1234') {
     res.json({ success: true, message: 'Login successful' });
   } else {
@@ -20,4 +21,6 @@ app.post('/api/login', (req, res) => {
 });
 
 // Run server
-app.listen(3000, () => console.log('Backend running on http://localhost:3000'));
+app.listen(3000, () => {
+  console.log('Backend running on http://localhost:3000');
+});
