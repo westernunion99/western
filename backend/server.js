@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve frontend files
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, '. ./frontend')));
 
 // Example API route for login
 app.post('/api/login', (req, res) => {
@@ -20,4 +20,4 @@ app.post('/api/login', (req, res) => {
 });
 
 // Run server
-app.listen(5000, () => console.log('Backend running on http://localhost:5500'));
+app.listen(3000, () => console.log('Backend running on http://localhost:3000'));
