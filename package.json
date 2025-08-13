@@ -7,8 +7,9 @@
   "name": "secure-auth",
   "version": "1.0.0",
   "description": "Secure Auth Project (frontend + backend) ======================================= This zip contains: - frontend/ : vanilla JS HTML files (use Live Server in VS Code) - backend/  : Node.js + Express backend (connect to MongoDB Atlas)",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

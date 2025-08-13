@@ -3,16 +3,15 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-app.use(cors()); // ✅ CORS enabled
-app.use(express.json()); // ✅ JSON body parsing
+app.use(cors());
+app.use(express.json());
 
-// Serve frontend files (fixed the space in path)
-app.use(express.static(path.join(__dirname, './frontend')));
+// Serve frontend files (fixing your path issue)
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 // Example API route for login
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-
   if (username === 'test' && password === '1234') {
     res.json({ success: true, message: 'Login successful' });
   } else {
@@ -20,7 +19,6 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// Run server
-app.listen(3000, () => {
-  console.log('Backend running on http://localhost:3000');
-});
+// Use Render's PORT or default to 3000 locally
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
