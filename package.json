@@ -1,18 +1,18 @@
 {
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "mongodb": "^6.18.0"
-  },
   "name": "secure-auth",
   "version": "1.0.0",
-  "description": "Secure Auth Project (frontend + backend) ======================================= This zip contains: - frontend/ : vanilla JS HTML files (use Live Server in VS Code) - backend/  : Node.js + Express backend (connect to MongoDB Atlas)",
-  "main": "server.js",
+  "description": "Secure Auth Project (frontend + backend)",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongodb": "^6.18.0"
+  }
 }
